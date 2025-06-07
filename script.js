@@ -1,4 +1,4 @@
-// Smooth scroll for nav links
+// === Smooth scroll for nav links ===
 document.querySelectorAll("nav a").forEach(link => {
   link.addEventListener("click", function(e) {
     e.preventDefault();
@@ -7,36 +7,62 @@ document.querySelectorAll("nav a").forEach(link => {
   });
 });
 
-// Typing animation effect (cleaner and smoother)
+// === Typing animation effect ===
 const typedText = document.querySelector(".typed-text");
 const phrases = ["Data Analyst", "Data Scientist", "ML Engineer", "Python Programmer"];
-let phraseIndex = 0;
-let charIndex = 0;
-let isDeleting = false;
+let i = 0, j = 0;
+let currentPhrase = "", isDeleting = false;
 
 function typeEffect() {
-  const currentPhrase = phrases[phraseIndex];
-  const partialText = currentPhrase.substring(0, charIndex);
+  if (i < phrases.length) {
+    if (!isDeleting && j <= phrases[i].length) {
+      currentPhrase = phrases[i].substring(0, j++);
+    } else if (isDeleting && j >= 0) {
+      currentPhrase = phrases[i].substring(0, j--);
+    }
 
-  typedText.textContent = partialText;
+    typedText.textContent = currentPhrase;
 
-  let delay = isDeleting ? 110 : 180;
+    if (!isDeleting && j === phrases[i].length) {
+      isDeleting = true;
+      setTimeout(typeEffect, 1400); // pause after typing full word
+      return;
+    }
 
-  if (!isDeleting && charIndex === currentPhrase.length) {
-    isDeleting = true;
-    setTimeout(typeEffect, 1400); // pause after full word typed
-    return;
+    if (isDeleting && j === 0) {
+      isDeleting = false;
+      i = (i + 1) % phrases.length;
+      setTimeout(typeEffect, 600); // pause before next word
+      return;
+    }
+
+    const typingSpeed = isDeleting ? 100 : 150;
+    setTimeout(typeEffect, typingSpeed);
   }
-
-  if (isDeleting && charIndex === 0) {
-    isDeleting = false;
-    phraseIndex = (phraseIndex + 1) % phrases.length;
-    setTimeout(typeEffect, 600); // pause before new word starts
-    return;
-  }
-
-  charIndex = isDeleting ? charIndex - 1 : charIndex + 1;
-  setTimeout(typeEffect, delay);
 }
 
 typeEffect();
+
+// === Contact Form Handling ===
+const form = document.getElementById("contactForm");
+const successMsg = document.getElementById("formSuccess");
+
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const formData = new FormData(form);
+  fetch(form.action, {
+    method: "POST",
+    body: formData,
+    headers: {
+      'Accept': 'application/json'
+    }
+  }).then(response => {
+    if (response.ok) {
+      successMsg.style.display = "block";
+      form.reset();
+    } else {
+      alert("Something went wrong. Please try again.");
+    }
+  });
+});
